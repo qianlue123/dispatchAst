@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <!-- action 表示提交信息到路由 xxx/params 里, 这里要和 cmd.go 的路由设置对应上 -->
+    <form action="/qianlue/api/params" method="POST" role="form">
+        <legend>话机信息</legend>
+
+        <div class="form-group">
+            <label>用户</label>
+            <input type="text" class="form-control" id="" name="extName" placeholder=" ">
+        </div>
+
+        <div class="form-group">
+            <label>年龄</label>
+            <input type="number" class="form-control" id="" name="extAge" placeholder=" ">
+        </div>
+
+        <div class="form-group">
+            <label>密码</label>
+            <input type="password" class="form-control" id="" name="extPwd" placeholder=" ">
+        </div>
+
+        <button type="submit" class="btn btn-info" >查询</button>
+    </form>
+</body>
+
+</html>
