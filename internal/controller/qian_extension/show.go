@@ -16,6 +16,10 @@ var mysqle = map[int]string{
 	1: "mysql -e 'show databases \\G' ",
 	2: "mysql -D asterisk -e 'show tables \\G' ",
 	3: "mysql -D asterisk -e 'select id from devices \\G' ",
+
+	// 反查已知列名所在的表, 可能不止一个
+	11: "mysql -e \"SELECT table_name from information_schema.columns " +
+		"where TABLE_SCHEMA='asterisk' and COLUMN_NAME='%s' ; \" ",
 }
 
 // 核心命令 asterisk -rx 'xxx'
@@ -32,9 +36,15 @@ var asteriskrx = map[int]string{
 
 	// 3-series, pjsip show
 	31: "asterisk -rx 'pjsip show endpoints' ",
+	32: "asterisk -rx 'pjsip show channels' ",
+	// channelid 可以由
+	33: "asterisk -rx 'pjsip show channel PJSIP/channelid' ",
+	// 比show多出通话时间列属性
+	34: "asterisk -rx 'pjsip list channels' ",
 }
 
 // 命令二次包装, 在asterisk 命令基础上叠加 shell
+// TODO 三次管道符可能得到状态码1, xargs 可能提升
 var mapBash = map[int]string{
 	1100: asteriskrx[11] + "| grep PJSIP",
 	1101: asteriskrx[11] + "| grep PJSIP | grep -i idle",
