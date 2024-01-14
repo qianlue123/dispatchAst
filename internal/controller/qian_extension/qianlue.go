@@ -10,8 +10,9 @@ import (
 
 // 定义枚举映射话机的状态
 const (
-	Idle = iota
-	InUse
+	Idle     = iota
+	NotInUse = 0
+	InUse    = iota
 	Ring
 	Ringing
 	Unavailable
@@ -46,6 +47,14 @@ func (c *Controller) Params(ctx context.Context, req *qian_info.ParamsReq) (res 
 	var ext extension
 	r.Parse(&ext)
 	r.Response.Writeln(ext)
+
+	// 所有在用电话
+	extensionsInUse := GetAllExtension(InUse)
+	r.Response.WriteJson(extensionsInUse)
+
+	// 所有可用电话
+	extensionsNotInUse := GetAllExtension(NotInUse)
+	r.Response.WriteJson(extensionsNotInUse)
 
 	return
 }

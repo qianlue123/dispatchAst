@@ -1,9 +1,11 @@
 package qian_extension
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 )
 
 /*
@@ -26,6 +28,9 @@ var mysqle = map[int]string{
 var asteriskrx = map[int]string{
 	// 1-serise, core show
 	1: "asterisk -rx 'core show help' ",
+	2: "asterisk -rx 'core show calls' ",
+	3: "asterisk -rx 'core show calls uptime' ",
+	4: "asterisk -rx 'core show sysinfo' ",
 	// hints 无法判断呼叫(直接当作是 inuse ) , 捕捉 ring 需要 channel 或者 pjsip
 	11: "asterisk -rx 'core show hints' ",
 	12: "asterisk -rx 'core show channels' ",
@@ -39,8 +44,10 @@ var asteriskrx = map[int]string{
 	32: "asterisk -rx 'pjsip show channels' ",
 	// channelid 可以由
 	33: "asterisk -rx 'pjsip show channel PJSIP/channelid' ",
+	// 结果里, 状态是主动打电话的 ring 也包含在 in use 里
+	34: "asterisk -rx 'pjsip list endpoints' ",
 	// 比show多出通话时间列属性
-	34: "asterisk -rx 'pjsip list channels' ",
+	35: "asterisk -rx 'pjsip list channels' ",
 }
 
 // 命令二次包装, 在asterisk 命令基础上叠加 shell
@@ -51,6 +58,7 @@ var mapBash = map[int]string{
 	1102: asteriskrx[11] + "| grep -i inuse",
 	1103: asteriskrx[11] + "| grep -i ringing",
 	1104: asteriskrx[11] + "| grep -i unavailable",
+	1105: asteriskrx[11] + "| grep -i 'inuse&ringing' ", // 打给已经通话的
 
 	1201: asteriskrx[12] + "| grep Ring\\ ",
 
@@ -58,6 +66,48 @@ var mapBash = map[int]string{
 
 	// 显示 channel 的信息, 4 列
 	3102: asteriskrx[31] + "| grep Channel | tail -n -2",
+
+	3401: asteriskrx[34] + "| tail --lines +5 | head --lines -3 ",
+	// 可用各类状态的电话数量, 先粗后细
+	3402: asteriskrx[34] + "| grep --ignore-case 'not in use' | wc -l",
+	3403: asteriskrx[34] + "| grep --ignore-case 'not in use' ",
+	// 再加一次管道防 not in use 状态
+	3404: asteriskrx[34] + "| grep --ignore-case 'in use' | grep -iv 'not' | wc -l",
+	3405: asteriskrx[34] + "| grep --ignore-case 'in use' | grep -iv 'not' ",
+	3406: asteriskrx[34] + "| grep --ignore-case 'Ringing' | wc -l",
+	3407: asteriskrx[34] + "| grep --ignore-case 'Ringing' ",
+	3408: asteriskrx[34] + "| grep --ignore-case 'unavailable' | wc -l",
+	3409: asteriskrx[34] + "| grep --ignore-case 'unavailable' ",
+}
+
+// 获取电话机对象所有的信息
+func GetAllExtension(state int) (arr []extension) {
+	switch state {
+	case Idle:
+		if getCount(mapBash[3402]) > 0 {
+			// 执行命令提取信息
+			cmd := mapBash[3402+1]
+			out, _ := exec.Command("bash", "-c", cmd).Output()
+			out = out[:len(out)-1]
+
+			fmt.Println(string(out))
+		}
+	case InUse:
+		if getCount(mapBash[3404]) > 0 {
+			// 执行命令提取信息
+			cmd := mapBash[3404+1] + "| awk '{print $2}'"
+			out, _ := exec.Command("bash", "-c", cmd).Output()
+			// 先去掉末尾换行再按换行切分
+			out = out[:len(out)-1]
+			outs := bytes.Split(out, []byte("\n"))
+			for i, content := range outs {
+				fmt.Printf("%d %v \n", i, string(content))
+				//TODO 在格式 1234/5678 里提取 1234
+			}
+		}
+	default:
+	}
+	return []extension{}
 }
 
 // 统计电话机数量
@@ -104,6 +154,23 @@ func GetStateExt(state int) string {
 		fmt.Println(string(out))
 	}
 	return string(out)
+}
+
+/**
+ * 功能: 返回一个数
+ */
+func getCount(cmd string) int {
+	checkTools("bash", "asterisk", "grep")
+
+	out, err := exec.Command("bash", "-c", cmd).Output()
+	if err != nil {
+		fmt.Printf("Failed to execute command: %s", cmd)
+		return 0
+	}
+	valueStr := string(out[:len(out)-1])
+	count, _ := strconv.Atoi(valueStr)
+
+	return count
 }
 
 /**
