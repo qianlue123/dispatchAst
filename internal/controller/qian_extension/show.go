@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 )
 
 /*
@@ -85,13 +86,9 @@ func GetAllExtension(state int) (arr []extension) {
 	switch state {
 	case Idle:
 		if getCount(mapBash[3402]) > 0 {
-			// 执行命令提取信息
-			cmd := mapBash[3402+1]
-			out, _ := exec.Command("bash", "-c", cmd).Output()
-			out = out[:len(out)-1]
-
-			fmt.Println(string(out))
+			arr = getArrExt(mapBash[3402+1])
 		}
+
 	case InUse:
 		if getCount(mapBash[3404]) > 0 {
 			// 执行命令提取信息
@@ -102,12 +99,32 @@ func GetAllExtension(state int) (arr []extension) {
 			outs := bytes.Split(out, []byte("\n"))
 			for i, content := range outs {
 				fmt.Printf("%d %v \n", i, string(content))
-				//TODO 在格式 1234/5678 里提取 1234
+				// 在格式 1234/5678 里提取 1234 当机号, 提取 5678 当 CID
+				v := strings.Split(string(content), "/")
+				ext := extension{ExtName: v[0], CID: v[1]}
+				// TODO 补全每个话机的数据
+				arr = append(arr, ext)
 			}
 		}
+
+	case Ringing:
+		if getCount(mapBash[3406]) > 0 {
+			arr = getArrExt(mapBash[3406+1])
+		}
+
+	case Ring:
+		//TODO 呼叫状态包含在 in use 里, 额外提取需要其他命令
+
+	case Unavailable:
+		if getCount(mapBash[3408]) > 0 {
+			arr = getArrExt(mapBash[3408+1])
+		}
+
 	default:
 	}
-	return []extension{}
+
+	fmt.Println(arr)
+	return arr
 }
 
 // 统计电话机数量
@@ -120,6 +137,26 @@ func GetCountExt() {
 		fmt.Printf("Failed to execute command: %s", cmd)
 	}
 	fmt.Println(string(out))
+}
+
+// 34xx 系列命令专用
+// asterisk -rx 'pjsip list endpoints' | grep -i ...
+func getArrExt(cmd string) (arr []extension) {
+	arr = make([]extension, 0)
+	// 在输入命令的基础上再加 awk
+	out, _ := exec.Command("bash", "-c", cmd+"| awk '{print $2}'").Output()
+	// 先去掉末尾换行再按换行切分
+	out = out[:len(out)-1]
+	outs := bytes.Split(out, []byte("\n"))
+	for i, content := range outs {
+		fmt.Printf("%d %v \n", i, string(content))
+		// 在格式 1234/5678 里提取 1234 当机号, 提取 5678 当 CID
+		v := strings.Split(string(content), "/")
+		ext := extension{ExtName: v[0], CID: v[1]}
+		// TODO 补全每个话机的数据
+		arr = append(arr, ext)
+	}
+	return arr
 }
 
 func GetStateExt(state int) string {

@@ -3,6 +3,7 @@ package qian_extension
 import (
 	"context"
 	"dispatchAst/api/qian_info"
+	"fmt"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -29,32 +30,57 @@ func New() *Controller {
 
 // 话机信息
 type extension struct {
-	ExtName string
+	CID     string
+	Desc    string // 用户名
+	ExtName string // 电话号
 	ExtAge  int
 	ExtPwd  string
 }
 
-// ip:port/xxx/params?name=xxx
+/**
+ * 功能: 专门用来查所有相同状态的话机集合
+ *
+ * e.g ip:port/qianlue/api/params?extensions=inuse
+ */
 func (c *Controller) Params(ctx context.Context, req *qian_info.ParamsReq) (res *qian_info.ParamsRes, err error) {
 	r := g.RequestFromCtx(ctx)
 
-	// uri 中没有 name 或没用提供值, 用 qianlue 代替
-	//name := r.GetQuery("name", "qianlue")
+	var extensions []extension
 
-	//r.Response.Writeln(name.String() + "good!")
+	// url 中没有提供值, 当作查所有可用状态的话机
+	state := r.GetQuery("extensions", "idle")
+	fmt.Println(state.String())
 
-	// 对应 <input> 里的 name 属性
-	var ext extension
-	r.Parse(&ext)
-	r.Response.Writeln(ext)
+	// 捕捉可能出现的输入情况, 当作同一类处理
+	switch state.String() {
+	case "InUse", "Inuse", "inuse", "in use":
+		extensions = GetAllExtension(InUse)
 
-	// 所有在用电话
-	extensionsInUse := GetAllExtension(InUse)
-	r.Response.WriteJson(extensionsInUse)
+	case "Ringing", "ringing":
+		extensions = GetAllExtension(Ringing)
 
-	// 所有可用电话
-	extensionsNotInUse := GetAllExtension(NotInUse)
-	r.Response.WriteJson(extensionsNotInUse)
+	case "Ring", "ring":
+		extensions = GetAllExtension(Ring)
+
+	case "Unavailable", "unavailable":
+		// 所有注册过但是没人用了的电话, 一般用不到
+		extensions = GetAllExtension(Unavailable)
+
+	case "Idle", "idle":
+		// 包含默认值
+		fallthrough
+	case "NotInUse", "Notinuse", "notinuse", "not in use":
+		// 所有可用电话
+		extensions = GetAllExtension(NotInUse)
+
+	default:
+		fmt.Println("参数传入错误")
+	}
+
+	if err := r.Parse(&extensions); err != nil {
+		fmt.Println(err)
+	}
+	r.Response.WriteJson(extensions)
 
 	return
 }
