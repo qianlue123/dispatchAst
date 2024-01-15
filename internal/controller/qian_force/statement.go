@@ -33,8 +33,9 @@ var asteriskrx = map[int]string{
 
 var mapBash = map[int]string{
 	// core show channels 先去除标题行和尾部统计信息
-	21: asteriskrx[2] + "| tail --lines +2 | head --lines -3 | awk '{print $1}' ",
-	22: asteriskrx[2] + "| tail --lines +2 | head --lines -3 | awk '{print $3}' ",
+	21: asteriskrx[2] + "| tail --lines +2 | head --lines -3 ",
+	22: asteriskrx[2] + "| tail --lines +2 | head --lines -3 | awk '{print $1}' ",
+	23: asteriskrx[2] + "| tail --lines +2 | head --lines -3 | awk '{print $1, $3}' ",
 
 	/** example of 'core show channels count'
 	 *   4 active channels
