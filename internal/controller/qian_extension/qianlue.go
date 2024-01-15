@@ -45,26 +45,30 @@ type extension struct {
 func (c *Controller) Params(ctx context.Context, req *qian_info.ParamsReq) (res *qian_info.ParamsRes, err error) {
 	r := g.RequestFromCtx(ctx)
 
-	var extensions []extension
+	code, msg, extensions := 200, "", make([]extension, 0)
+	msg = "list qianlue data, all extension whose who are "
 
 	// url 中没有提供值, 当作查所有可用状态的话机
 	state := r.GetQuery("extensions", "idle")
-	fmt.Println(state.String())
 
 	// 捕捉可能出现的输入情况, 当作同一类处理
 	switch state.String() {
 	case "InUse", "Inuse", "inuse", "in use":
 		extensions = GetAllExtension(InUse)
+		msg += "in use"
 
 	case "Ringing", "ringing":
 		extensions = GetAllExtension(Ringing)
+		msg += "ringing"
 
 	case "Ring", "ring":
 		extensions = GetAllExtension(Ring)
+		msg += "ring"
 
 	case "Unavailable", "unavailable":
 		// 所有注册过但是没人用了的电话, 一般用不到
 		extensions = GetAllExtension(Unavailable)
+		msg += "unavailable"
 
 	case "Idle", "idle":
 		// 包含默认值
@@ -72,15 +76,21 @@ func (c *Controller) Params(ctx context.Context, req *qian_info.ParamsReq) (res 
 	case "NotInUse", "Notinuse", "notinuse", "not in use":
 		// 所有可用电话
 		extensions = GetAllExtension(NotInUse)
+		msg += "not in use"
 
 	default:
-		fmt.Println("参数传入错误")
+		code = 0
+		msg = "参数传入错误"
 	}
 
 	if err := r.Parse(&extensions); err != nil {
 		fmt.Println(err)
 	}
-	r.Response.WriteJson(extensions)
+	r.Response.WriteJson(ghttp.DefaultHandlerResponse{
+		Code:    code,
+		Message: msg,
+		Data:    extensions,
+	})
 
 	return
 }
