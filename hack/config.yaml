@@ -1,7 +1,10 @@
-
-# CLI tool, only in development environment.
-# https://goframe.org/pages/viewpage.action?pageId=3673173
 gfcli:
+  gen:
+    dao:
+      link: "mysql:root:@tcp(127.0.0.1:3306)/asterisk?loc=Local&parseTime=true"
+      tables: "devices,users"
+      jsonCase: "Snake"  # devices 有字段是下划线方式
+
   docker:
     build: "-a amd64 -s linux -p temp -ew"
     tagPrefixes:
