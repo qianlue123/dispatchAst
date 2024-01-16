@@ -102,7 +102,7 @@ func GetAllExtension(state int) (arr []extension) {
 				// 在格式 1234/5678 里提取 1234 当机号, 提取 5678 当 CID
 				v := strings.Split(string(content), "/")
 				ext := extension{ExtName: v[0], CID: v[1]}
-				// TODO 补全每个话机的数据
+				ReplenishData_ext(&ext)
 				arr = append(arr, ext)
 			}
 		}
@@ -153,7 +153,7 @@ func getArrExt(cmd string) (arr []extension) {
 		// 在格式 1234/5678 里提取 1234 当机号, 提取 5678 当 CID
 		v := strings.Split(string(content), "/")
 		ext := extension{ExtName: v[0], CID: v[1]}
-		// TODO 补全每个话机的数据
+		ReplenishData_ext(&ext)
 		arr = append(arr, ext)
 	}
 	return arr
