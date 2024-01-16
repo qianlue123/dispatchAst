@@ -30,13 +30,13 @@ var (
 			s.Group("/qianlue", func(group *ghttp.RouterGroup) {
 				group.Middleware(ghttp.MiddlewareHandlerResponse)
 				group.Group("/force", func(g1 *ghttp.RouterGroup) {
-					g1.Middleware(ghttp.MiddlewareHandlerResponse)
-
+					//g1.Middleware(ghttp.MiddlewareHandlerResponse)
+					g1.Middleware(ghttp.MiddlewareCORS)
 					g1.REST("/", moduleForce)
 				})
 				group.Group("/api", func(g2 *ghttp.RouterGroup) {
-					g2.Middleware(ghttp.MiddlewareHandlerResponse)
-
+					//g2.Middleware(ghttp.MiddlewareHandlerResponse)
+					g2.Middleware(ghttp.MiddlewareCORS)
 					g2.Bind( // Bind 可以让控制器里的所有方法都能访问
 						moduleQianlue,
 					)
