@@ -56,6 +56,7 @@ func (c *Controller) Get(req *ghttp.Request) {
 	code, msg := 200, ""
 
 	extension := req.GetQuery("extension", "0")
+	statistics := req.GetQuery("statistics", "0")
 	thing := req.GetQuery("dothing2", "0")
 
 	// 有 extension 参数就做这件事
@@ -70,6 +71,23 @@ func (c *Controller) Get(req *ghttp.Request) {
 			if err := req.Parse(&data); err != nil {
 				code, msg = 1, "error: "+err.Error()
 			}
+		}
+
+		req.Response.WriteJson(ghttp.DefaultHandlerResponse{
+			Code:    code,
+			Message: msg,
+			Data:    data,
+		})
+	}
+
+	// 统计类查找, 返回的都是数字
+	if statistics.String() != "0" {
+		data := 0
+		switch statistics.String() {
+		case "calls":
+			data = getCallCount()
+
+		default:
 		}
 
 		req.Response.WriteJson(ghttp.DefaultHandlerResponse{
