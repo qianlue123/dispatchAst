@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"dispatchAst/api/qian_force"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -105,15 +106,32 @@ func (c *Controller) Get(req *ghttp.Request) {
 
 // 获取channel id
 func (c *Controller) Post(req *ghttp.Request) {
-	channelID := req.GetQuery("channelid", "PJSIP/2024-00000066")
+	data := make(map[string]string, 1)
+	data["channelid"] = ""
+	json.NewDecoder(req.Body).Decode(&data)
 
-	cmd := fmt.Sprintf(asteriskrx[51], channelID)
-	fmt.Println(cmd)
-	out, err := exec.Command("bash", "-c", cmd).Output()
-	if err != nil {
-		fmt.Printf("Failed to execute command: %s", cmd)
+	code, msg := 200, ""
+	if len(data["channelid"]) == 0 {
+		code, msg = 0, "客户端post请求出错, 提供的数据不符合要求"
+	} else {
+		fmt.Printf("%v", data)
+		// channelID := req.GetQuery("channelid", "PJSIP/2024-00000066")
+		channelID := data["channelid"]
+		fmt.Println("channelid from client: ", channelID)
+
+		cmd := fmt.Sprintf(asteriskrx[51], channelID)
+		out, err := exec.Command("bash", "-c", cmd).Output()
+		if err != nil {
+			fmt.Printf("Failed to execute command: %s", cmd)
+		}
+		fmt.Println(string(out))
+		code, msg = 200, "kill channel "+channelID+" ok"
 	}
-	fmt.Println(string(out))
+	req.Response.WriteJson(ghttp.DefaultHandlerResponse{
+		Code:    code,
+		Message: msg,
+		Data:    "",
+	})
 }
 
 func GetChannelInfo(extName string) []Channel {
