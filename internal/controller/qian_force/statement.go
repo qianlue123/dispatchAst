@@ -29,6 +29,8 @@ var asteriskrx = map[int]string{
 	5: "asterisk -rx 'channel request hangup all' ",
 	// 拼装型命令, 配合 go sprintf
 	51: "asterisk -rx 'channel request hangup %s ' ", // e.g. PJSIP/2024-00000048
+
+	61: "asterisk -rx 'channel originate local/%s@from-internal extension %s@from-internal' ",
 }
 
 var mapBash = map[int]string{

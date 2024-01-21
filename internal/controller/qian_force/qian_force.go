@@ -134,6 +134,39 @@ func (c *Controller) Post(req *ghttp.Request) {
 	})
 }
 
+// 更新多个呼叫的分机
+func (c *Controller) Put(req *ghttp.Request) {
+	code, msg, extNameArr := 200, "ok", make([]string, 0)
+	defer req.Response.WriteJson(ghttp.DefaultHandlerResponse{
+		Code:    code,
+		Message: msg,
+		Data:    extNameArr,
+	})
+
+	var info map[string]any
+	json.NewDecoder(req.Body).Decode(&info)
+	for _, params := range info {
+		// fmt.Printf("%T, %v\n", v, v)
+		if con, ok := params.([]any); ok {
+			for _, element := range con {
+				extNameArr = append(extNameArr, element.(string))
+			}
+		}
+	}
+
+	fmt.Println(extNameArr[0], extNameArr[1])
+	// 此处不检测提供的分机是否存在, 由前端控制
+	// 离线的分机不显示, 在通话中的分机还可以再呼叫
+
+	cmd := fmt.Sprintf(asteriskrx[61], extNameArr[0], extNameArr[1])
+	_, err := exec.Command("bash", "-c", cmd).Output()
+	if err != nil {
+		code, msg = 1, "Failed to execute call them"
+		return
+	}
+
+}
+
 func GetChannelInfo(extName string) []Channel {
 	var channels []Channel
 
