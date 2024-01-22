@@ -64,14 +64,18 @@ func (c *Controller) Get(req *ghttp.Request) {
 	if extension.String() != "0" {
 		data := make([]Channel, 0)
 
-		if count := getCallCount(); count == 0 {
-			code, msg = 1, "没有电话在使用中"
-		} else {
+		if activechannels, exist := getChannelCount(); exist {
+			if activechannels != getCallCount()*2 {
+				msg = "OK, but some channels comes from force plug!"
+			}
+
 			data = GetChannelInfo(extension.String())
 
 			if err := req.Parse(&data); err != nil {
 				code, msg = 1, "error: "+err.Error()
 			}
+		} else {
+			code, msg = 1, "there is no Extension in use!"
 		}
 
 		req.Response.WriteJson(ghttp.DefaultHandlerResponse{
@@ -204,13 +208,20 @@ func getCallCount() int {
 	return count
 }
 
-// = callcount * 2
-func getChannelCount() int {
+/**
+ * 功能: 确认有激活的信道, 统计其数量
+ *
+ * note: channels >= 2 * calls
+ */
+func getChannelCount() (int, bool) {
 	cmd := mapBash[212]
 	out, _ := exec.Command("bash", "-c", cmd).Output()
 	valueStr := string(out[:len(out)-1])
 	count, _ := strconv.Atoi(valueStr)
-	return count
+	if count == 0 {
+		return 0, false
+	}
+	return count, true
 }
 
 func checkTools(toolName ...string) {
