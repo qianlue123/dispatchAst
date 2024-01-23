@@ -1,7 +1,12 @@
 package qian_extension
 
 import (
+	"bytes"
 	"fmt"
+
+	SQL "dispatchAst/internal/consts"
+
+	"os/exec"
 
 	"github.com/gogf/gf/v2/frame/g"
 )
@@ -28,4 +33,25 @@ func ReplenishData_ext(ext *extension) {
 	default:
 		//TODO
 	}
+}
+
+/* ***** ***** *****  备用方案  ***** ***** ***** */
+
+// 获取一条记录的3个字段 id,user,description
+func Spare_ReplenishData_ext(ext *extension) {
+	recordOne := make(map[int]string, 0)
+
+	cmd := fmt.Sprintf(SQL.E[31]+"| sed --quiet 2p", ext.ExtName)
+	out, err := exec.Command("bash", "-c", cmd).Output()
+	if err != nil {
+		fmt.Printf("Failed to execute command: %s", cmd)
+		return
+	}
+	out = out[:len(out)-1]
+	outs := bytes.Split(out, []byte("\t"))
+	for i, content := range outs {
+		recordOne[i] = string(content)
+	}
+
+	ext.Desc = recordOne[2]
 }

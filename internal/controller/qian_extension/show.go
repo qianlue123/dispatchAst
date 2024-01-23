@@ -9,22 +9,6 @@ import (
 	"strings"
 )
 
-/*
-   展示话机状态信息
-
-*/
-
-// 数据库命令 mysql -D -e 'xxx \G'
-var mysqle = map[int]string{
-	1: "mysql -e 'show databases \\G' ",
-	2: "mysql -D asterisk -e 'show tables \\G' ",
-	3: "mysql -D asterisk -e 'select id from devices \\G' ",
-
-	// 反查已知列名所在的表, 可能不止一个
-	11: "mysql -e \"SELECT table_name from information_schema.columns " +
-		"where TABLE_SCHEMA='asterisk' and COLUMN_NAME='%s' ; \" ",
-}
-
 // 核心命令 asterisk -rx 'xxx'
 var asteriskrx = map[int]string{
 	// 1-serise, core show
