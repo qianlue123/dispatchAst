@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/gcmd"
 
 	"dispatchAst/internal/controller/hello"
+	"dispatchAst/internal/controller/qian_conference"
 	"dispatchAst/internal/controller/qian_extension"
 	"dispatchAst/internal/controller/qian_force"
 )
@@ -23,6 +24,7 @@ var (
 			moduleHello := hello.New()
 			moduleQianlue := qian_extension.New()
 			moduleForce := qian_force.New()
+			moduleConference := qian_conference.New()
 
 			s.BindObject("/", moduleHello)
 
@@ -41,7 +43,7 @@ var (
 						moduleQianlue,
 					)
 
-					//	g2.REST("/", moduleQianlue)
+					g2.REST("/meet", moduleConference)
 				})
 			})
 
