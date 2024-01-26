@@ -2,6 +2,7 @@ package qian_extension
 
 import (
 	"bytes"
+	Ast "dispatchAst/internal/consts"
 	"fmt"
 	"os"
 	"os/exec"
@@ -9,7 +10,12 @@ import (
 	"strings"
 )
 
+func CMD(cmd string) string {
+	return fmt.Sprintf("asterisk -rx '%s' ", cmd)
+}
+
 // 核心命令 asterisk -rx 'xxx'
+// NOTE 逐渐废弃
 var asteriskrx = map[int]string{
 	// 1-serise, core show
 	1: "asterisk -rx 'core show help' ",
@@ -38,31 +44,31 @@ var asteriskrx = map[int]string{
 // 命令二次包装, 在asterisk 命令基础上叠加 shell
 // TODO 三次管道符可能得到状态码1, xargs 可能提升
 var mapBash = map[int]string{
-	1100: asteriskrx[11] + "| grep PJSIP",
-	1101: asteriskrx[11] + "| grep PJSIP | grep -i idle",
-	1102: asteriskrx[11] + "| grep -i inuse",
-	1103: asteriskrx[11] + "| grep -i ringing",
-	1104: asteriskrx[11] + "| grep -i unavailable",
-	1105: asteriskrx[11] + "| grep -i 'inuse&ringing' ", // 打给已经通话的
+	1100: CMD(Ast.RX[56]) + "| grep PJSIP",
+	1101: CMD(Ast.RX[56]) + "| grep PJSIP | grep -i idle",
+	1102: CMD(Ast.RX[56]) + "| grep -i inuse",
+	1103: CMD(Ast.RX[56]) + "| grep -i ringing",
+	1104: CMD(Ast.RX[56]) + "| grep -i unavailable",
+	1105: CMD(Ast.RX[56]) + "| grep -i 'inuse&ringing' ", // 打给已经通话的
 
-	1201: asteriskrx[12] + "| grep Ring\\ ",
+	1201: CMD(Ast.RX[54]) + "| grep Ring\\ ",
 
 	2101: asteriskrx[21] + "| tail --lines 1 | awk '{print $1}'",
 
 	// 显示 channel 的信息, 4 列
-	3102: asteriskrx[31] + "| grep Channel | tail -n -2",
+	3102: CMD(Ast.RX[8]) + "| grep Channel | tail -n -2",
 
-	3401: asteriskrx[34] + "| tail --lines +5 | head --lines -3 ",
+	3401: CMD(Ast.RX[14]) + "| tail --lines +5 | head --lines -3 ",
 	// 可用各类状态的电话数量, 先粗后细
-	3402: asteriskrx[34] + "| grep --ignore-case 'not in use' | wc -l",
-	3403: asteriskrx[34] + "| grep --ignore-case 'not in use' ",
+	3402: CMD(Ast.RX[14]) + "| grep --ignore-case 'not in use' | wc -l",
+	3403: CMD(Ast.RX[14]) + "| grep --ignore-case 'not in use' ",
 	// 再加一次管道防 not in use 状态
-	3404: asteriskrx[34] + "| grep --ignore-case 'in use' | grep -iv 'not' | wc -l",
-	3405: asteriskrx[34] + "| grep --ignore-case 'in use' | grep -iv 'not' ",
-	3406: asteriskrx[34] + "| grep --ignore-case 'Ringing' | wc -l",
-	3407: asteriskrx[34] + "| grep --ignore-case 'Ringing' ",
-	3408: asteriskrx[34] + "| grep --ignore-case 'unavailable' | wc -l",
-	3409: asteriskrx[34] + "| grep --ignore-case 'unavailable' ",
+	3404: CMD(Ast.RX[14]) + "| grep --ignore-case 'in use' | grep -iv 'not' | wc -l",
+	3405: CMD(Ast.RX[14]) + "| grep --ignore-case 'in use' | grep -iv 'not' ",
+	3406: CMD(Ast.RX[14]) + "| grep --ignore-case 'Ringing' | wc -l",
+	3407: CMD(Ast.RX[14]) + "| grep --ignore-case 'Ringing' ",
+	3408: CMD(Ast.RX[14]) + "| grep --ignore-case 'unavailable' | wc -l",
+	3409: CMD(Ast.RX[14]) + "| grep --ignore-case 'unavailable' ",
 }
 
 // 获取电话机对象所有的信息
