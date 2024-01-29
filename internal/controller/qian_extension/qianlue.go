@@ -35,6 +35,7 @@ type extension struct {
 	ExtName string // 电话号
 	ExtAge  int
 	ExtPwd  string
+	State   int // 状态
 }
 
 /**
@@ -116,9 +117,34 @@ func (c *Controller) Delete(req *ghttp.Request) {
 }
 
 func (c *Controller) Get(req *ghttp.Request) {
-	GetStateExt(ALL)
+	code, msg := 200, "ok"
+	var data any
 
-	req.Response.Writeln("查询话机接口")
+	extName := req.GetQuery("extension", "0").String()
+
+	/* 获取单个话机信息
+	 * e.g ip:port/qianlue/api/get?extension=8008
+	 */
+	if extName != "0" {
+		// 先确认分机号存在, 再确认分机号状态
+		if !IsExistExt(extName) {
+			code, msg = 1, "not exist this extension!"
+		} else {
+			Ext := extension{
+				ExtName: extName,
+				State:   GetExtensionState(extName),
+			}
+
+			ReplenishData_ext(&Ext)
+			data = Ext
+		}
+		req.Response.WriteJson(ghttp.DefaultHandlerResponse{
+			Code:    code,
+			Message: msg,
+			Data:    data.(extension),
+		})
+		return
+	}
 
 	info := ""
 	if info = GetStateExt(InUse); info != "0" {

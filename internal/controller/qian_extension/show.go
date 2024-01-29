@@ -44,6 +44,12 @@ var asteriskrx = map[int]string{
 // 命令二次包装, 在asterisk 命令基础上叠加 shell
 // TODO 三次管道符可能得到状态码1, xargs 可能提升
 var mapBash = map[int]string{
+	81: CMD(Ast.RX[8]) + "| grep 'In use' | wc -l ",
+	82: CMD(Ast.RX[8]) + "| grep 'In use' | awk '{print $2}' ",
+	83: CMD(Ast.RX[8]) + "| grep --ignore-case 'not in use' | wc -l ",
+	84: CMD(Ast.RX[8]) + "| grep --ignore-case 'not in use' | awk '{print $2}' ",
+	91: CMD(Ast.RX[9]) + "| wc -l",
+
 	1100: CMD(Ast.RX[56]) + "| grep PJSIP",
 	1101: CMD(Ast.RX[56]) + "| grep PJSIP | grep -i idle",
 	1102: CMD(Ast.RX[56]) + "| grep -i inuse",
@@ -149,6 +155,37 @@ func getArrExt(cmd string) (arr []extension) {
 	return arr
 }
 
+func GetExtensionState(name string) (state int) {
+	state = Unavailable
+
+	if getCount(mapBash[81]) > 0 {
+		out, _ := exec.Command("bash", "-c", mapBash[82]).Output()
+		out = out[:len(out)-1]
+		outs := bytes.Split(out, []byte("\n"))
+		for _, content := range outs {
+			v := strings.Split(string(content), "/")
+			if v[0] == name {
+				state = InUse
+			}
+		}
+	}
+
+	// check array who are not in use
+	if getCount(mapBash[83]) > 0 {
+		out, _ := exec.Command("bash", "-c", mapBash[84]).Output()
+		out = out[:len(out)-1]
+		outs := bytes.Split(out, []byte("\n"))
+		for _, content := range outs {
+			v := strings.Split(string(content), "/")
+			if v[0] == name {
+				state = NotInUse
+			}
+		}
+	}
+
+	return state
+}
+
 func GetStateExt(state int) string {
 	checkTools("bash", "asterisk", "fwconsole", "grep")
 	cmd := ""
@@ -211,4 +248,15 @@ func checkTools(toolName ...string) {
 			os.Exit(1)
 		}
 	}
+}
+
+// 功能: 确认提供的话机已经注册
+func IsExistExt(extName string) bool {
+	cmd := fmt.Sprintf(mapBash[91], extName)
+
+	out, _ := exec.Command("bash", "-c", cmd).Output()
+	out = out[:len(out)-1]
+
+	number, _ := strconv.Atoi(string(out))
+	return (number != 2) // 如果有数据, 能数到150多行
 }
