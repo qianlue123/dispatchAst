@@ -16,6 +16,7 @@ var RX = map[int]string{
 	10: "pjsip show transpoints", // 显示连接协议
 	12: "pjsip show version",
 	14: "pjsip list endpoints",
+	16: "pjsip show contacts", // 分机的局域网IP
 
 	// 单数传参, 和从数据库中获取值等效
 	3:  "pjsip show channel '%s' ",
@@ -23,6 +24,7 @@ var RX = map[int]string{
 	7:  "pjsip show auth '%s' ",
 	9:  "pjsip show endpoint '%s' ",
 	11: "pjsip show transpoint '%s' ",
+	17: "pjsip show contact '%s' ",
 
 	/** 51-100 core series
 	 */
@@ -36,6 +38,27 @@ var RX = map[int]string{
 	53: "core show calls uptime",
 	55: "core show hint '%s' ",
 	57: "core show channel '%s' ",
+
+	/** 101-150 database series
+	 */
+	101: "database show pbx",
+
+	// family
+	102: "database show ampuser",
+	104: "database show device",
+	106: "database show CW",
+	108: "database show CustomDevstate",
+	110: "database show CustomPresence",
+	112: "database show registrar",
+	115: "database show registrar/contact", // k: {json} 格式
+
+	// keytree
+	103: "database show ampuser '%s' ",
+	105: "database show device '%s' ",
+	107: "database show CW '%s' ",
+	109: "database show CustomDevstate '%s' ",
+	111: "database show CustomPresence '%s' ",
+	113: "database show registrar '%s' ",
 }
 
 // manipulate module
