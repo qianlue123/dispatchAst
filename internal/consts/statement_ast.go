@@ -59,6 +59,20 @@ var RX = map[int]string{
 	109: "database show CustomDevstate '%s' ",
 	111: "database show CustomPresence '%s' ",
 	113: "database show registrar '%s' ",
+
+	/** 151-200 confbridge series
+	 */
+	151: "confbridge list",
+
+	152: "confbridge kick %s all",   // 关房
+	154: "confbridge lock %s",       // 锁门, 只有 admin 用户能进
+	155: "confbridge unlock %s",     // 不锁
+	156: "confbridge mute %s all",   // 全禁
+	158: "confbridge unmute %s all", // 全解
+
+	153: "confbridge kick %s %s",   // 踢某个
+	157: "confbridge mute %s %s",   // 禁言某人
+	159: "confbridge unmute %s %s", // 解禁某人
 }
 
 // manipulate module
