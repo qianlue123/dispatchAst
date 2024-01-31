@@ -95,9 +95,16 @@ func GetAllExtension(state int) (arr []extension) {
 			outs := bytes.Split(out, []byte("\n"))
 			for i, content := range outs {
 				fmt.Printf("%d %v \n", i, string(content))
-				// 在格式 1234/5678 里提取 1234 当机号, 提取 5678 当 CID
-				v := strings.Split(string(content), "/")
-				ext := extension{ExtName: v[0], CID: v[1]}
+
+				var ext extension
+				if strings.Contains(string(content), "/") {
+					// 在格式 1234/5678 里提取 1234 当机号, 提取 5678 当 CID
+					v := strings.Split(string(content), "/")
+					ext = extension{ExtName: v[0], CID: v[1]}
+				} else {
+					ext.ExtName = string(content)
+				}
+
 				ReplenishData_ext(&ext)
 				arr = append(arr, ext)
 			}
@@ -146,9 +153,17 @@ func getArrExt(cmd string) (arr []extension) {
 	outs := bytes.Split(out, []byte("\n"))
 	for i, content := range outs {
 		fmt.Printf("%d %v \n", i, string(content))
-		// 在格式 1234/5678 里提取 1234 当机号, 提取 5678 当 CID
-		v := strings.Split(string(content), "/")
-		ext := extension{ExtName: v[0], CID: v[1]}
+
+		ext := extension{}
+		if !strings.Contains(string(content), "/") {
+			// 按照 <权威指南 5th> 示例, 创建的话机可能没有设置 CID
+			ext.ExtName = string(content)
+		} else {
+			// 在格式 1234/5678 里提取 1234 当机号, 提取 5678 当 CID
+			v := strings.Split(string(content), "/")
+			ext.ExtName, ext.CID = v[0], v[1]
+		}
+
 		ReplenishData_ext(&ext)
 		arr = append(arr, ext)
 	}
