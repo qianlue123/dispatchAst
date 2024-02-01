@@ -51,6 +51,7 @@ var RX = map[int]string{
 	110: "database show CustomPresence",
 	112: "database show registrar",
 	115: "database show registrar/contact", // k: {json} 格式
+	116: "database show RECconf",
 
 	// keytree
 	103: "database show ampuser '%s' ",
@@ -59,6 +60,7 @@ var RX = map[int]string{
 	109: "database show CustomDevstate '%s' ",
 	111: "database show CustomPresence '%s' ",
 	113: "database show registrar '%s' ",
+	117: "database show RECconf '%s' ",
 
 	/** 151-200 confbridge series
 	 */

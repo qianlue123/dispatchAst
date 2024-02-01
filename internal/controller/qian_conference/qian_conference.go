@@ -37,10 +37,23 @@ func (c *Controller) Get(req *ghttp.Request) {
 	if rooms != "00" {
 		var data []ConfBridge
 
-		if count := GetConfCount(); count == 0 {
-			msg, data = "当前没有会议", nil
-		} else {
-			msg, data = fmt.Sprintf("正在进行 %d 场会议", count), GetRooms()
+		switch {
+		case rooms == "inuse":
+			if count := GetConfCount(InUse); count == 0 {
+				msg, data = "当前没有会议", nil
+			} else {
+				msg, data = fmt.Sprintf("正在进行 %d 场会议", count), GetRooms()
+			}
+
+		case rooms == "all":
+			fallthrough
+
+		default:
+			if count := GetConfCount(ALL); count == 0 {
+				msg, data = "尚未注册任何房间", nil
+			} else {
+				msg, data = fmt.Sprintf("已经有 %d 个空房间", count), GetEmptyRooms()
+			}
 		}
 
 		req.Response.WriteJson(ghttp.DefaultHandlerResponse{
