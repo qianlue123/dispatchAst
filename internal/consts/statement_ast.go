@@ -87,6 +87,18 @@ var RX = map[int]string{
 	205: "channel originate local/%s@%s extension %s@%s",        //
 	207: "channel originate PJSIP/%s application Dial PJSIP/%s", // 忽略具体信道
 
+	/** 251-300 bridge series
+	 */
+	251: "bridge technology show",
+
+	252: "bridge show all",
+	254: "bridge kick %s all", // 踢掉桥各端
+
+	// 末尾会列出桥上所有信道
+	253: "bridge show %s",    // 单个桥信息, 12+
+	255: "bridge kick %s %s", // 多个信道踢一个, 只有两个就全踢
+	257: "bridge technology suspend %s",
+	259: "bridge technology unsuspend %s",
 }
 
 // manipulate module

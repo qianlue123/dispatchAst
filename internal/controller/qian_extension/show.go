@@ -50,6 +50,8 @@ var mapBash = map[int]string{
 	84: CMD(Ast.RX[8]) + "| grep --ignore-case 'not in use' | awk '{print $2}' ",
 	91: CMD(Ast.RX[9]) + "| wc -l",
 
+	571: CMD(Ast.RX[57]) + "| grep --ignore-case 'bridge ID' ",
+
 	1100: CMD(Ast.RX[56]) + "| grep PJSIP",
 	1101: CMD(Ast.RX[56]) + "| grep PJSIP | grep -i idle",
 	1102: CMD(Ast.RX[56]) + "| grep -i inuse",
