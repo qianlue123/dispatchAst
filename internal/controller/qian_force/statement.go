@@ -1,5 +1,9 @@
 package qian_force
 
+import (
+	Ast "dispatchAst/internal/consts"
+)
+
 // 展示信道状态信息
 type Channel struct {
 	ChannelID string
@@ -24,13 +28,6 @@ var asteriskrx = map[int]string{
 	31: "asterisk -rx 'pjsip show channel %d' ", // channelID
 	// 显示 channelID 后面带 /Dial | /AppDial
 	4: "asterisk -rx 'pjsip list channels' ",
-
-	// 原先的 soft hangup
-	5: "asterisk -rx 'channel request hangup all' ",
-	// 拼装型命令, 配合 go sprintf
-	51: "asterisk -rx 'channel request hangup %s ' ", // e.g. PJSIP/2024-00000048
-
-	61: "asterisk -rx 'channel originate local/%s@from-internal extension %s@from-internal' ",
 }
 
 var mapBash = map[int]string{
@@ -46,4 +43,8 @@ var mapBash = map[int]string{
 	 */
 	211: asteriskrx[21] + "| grep 'active call' | awk '{print $1}' ",
 	212: asteriskrx[21] + "| grep channels | awk '{print $1}' ",
+
+	201: CMD(Ast.RX[201]),
+	203: CMD(Ast.RX[203]),
+	207: CMD(Ast.RX[207]),
 }

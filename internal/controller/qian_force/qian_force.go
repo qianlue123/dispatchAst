@@ -22,6 +22,21 @@ func New() *Controller {
 	return &Controller{}
 }
 
+func CMD(cmd string) string {
+	out, _ := exec.Command("bash", "-c", "whoami").Output()
+	if out = out[:len(out)-1]; string(out) != "root" {
+		return fmt.Sprintf("sudo asterisk -rx '%s' ", cmd)
+	}
+	return fmt.Sprintf("asterisk -rx '%s' ", cmd)
+}
+
+// 功能: 判断环境是不是 freepbx
+func envIsFreepbx() bool {
+	_, err := exec.LookPath("fwconsole")
+
+	return (err == nil)
+}
+
 func (c *Controller) Params(ctx context.Context, req *qian_force.ParamsReq) (res *qian_force.ParamsRes, err error) {
 	r := g.RequestFromCtx(ctx)
 	r.Response.Writeln("params")
@@ -123,7 +138,7 @@ func (c *Controller) Post(req *ghttp.Request) {
 		channelID := data["channelid"]
 		fmt.Println("channelid from client: ", channelID)
 
-		cmd := fmt.Sprintf(asteriskrx[51], channelID)
+		cmd := fmt.Sprintf(mapBash[203], channelID)
 		out, err := exec.Command("bash", "-c", cmd).Output()
 		if err != nil {
 			fmt.Printf("Failed to execute command: %s", cmd)
@@ -162,7 +177,13 @@ func (c *Controller) Put(req *ghttp.Request) {
 	// 此处不检测提供的分机是否存在, 由前端控制
 	// 离线的分机不显示, 在通话中的分机还可以再呼叫
 
-	cmd := fmt.Sprintf(asteriskrx[61], extNameArr[0], extNameArr[1])
+	cmd := ""
+	if envIsFreepbx() {
+		cmd = fmt.Sprintf(asteriskrx[201], extNameArr[0], extNameArr[1])
+	} else {
+		cmd = fmt.Sprintf(mapBash[207], extNameArr[0], extNameArr[1])
+	}
+
 	_, err := exec.Command("bash", "-c", cmd).Output()
 	if err != nil {
 		code, msg = 1, "Failed to execute call them"

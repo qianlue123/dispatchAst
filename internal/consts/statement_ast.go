@@ -75,6 +75,18 @@ var RX = map[int]string{
 	153: "confbridge kick %s %s",   // 踢某个
 	157: "confbridge mute %s %s",   // 禁言某人
 	159: "confbridge unmute %s %s", // 解禁某人
+
+	/** 201-250
+	 */
+	201: "channel originate local/%s@from-internal extension %s@from-internal", // freepbx 通例
+
+	// 老版本的 soft hangup
+	202: "channel request hangup all",
+
+	203: "channel request hangup %s ",                           // e.g. PJSIP/2024-00000048
+	205: "channel originate local/%s@%s extension %s@%s",        //
+	207: "channel originate PJSIP/%s application Dial PJSIP/%s", // 忽略具体信道
+
 }
 
 // manipulate module
