@@ -12,7 +12,18 @@
 Your Best Source Asterisk PBX GUI Solution    
 ```
 
+![go version](https://img.shields.io/badge/Go-v1.22-blue?logo=Go)
+
+
 ## Usage
+
+> Learn to use `FreePBX` first
+
+先确认 asterisk系统 使用的同名数据库 `asterisk` 里有至少 27 张表（包括 devices）, 如果没有, 可以利用项目目录 `utility` 里的表文件创建
+
+```bash
+mysql -D asterisk < tables.sql
+```
 
 可执行文件需要和配置文件放在一起
 
@@ -25,7 +36,6 @@ Your Best Source Asterisk PBX GUI Solution
 └── ...
 ```
 
-Learn to use `FreePBX` first
 
 ## Reference
 
