@@ -28,6 +28,9 @@ func (c *Controller) Get(req *ghttp.Request) {
 
 	if statistics != "00" {
 		data := getValue4Statistics(statistics)
+		if data == 0 {
+			code = 404
+		}
 
 		req.Response.WriteJson(ghttp.DefaultHandlerResponse{
 			Code:    code,
@@ -38,9 +41,10 @@ func (c *Controller) Get(req *ghttp.Request) {
 	}
 
 	if bridges != "00" {
-		bridgeNameArr := GetBridgeName()
-
-		data := bridgeNameArr
+		data := GetBridgeName()
+		if len(data) == 0 {
+			code = 404
+		}
 
 		if bridges == "1" {
 			req.Response.WriteJson(ghttp.DefaultHandlerResponse{

@@ -125,6 +125,11 @@ func GetPeerExtNameWithName(channelName string) string {
 
 // 功能: 获取系统所有桥接
 func GetBridgeName() []string {
+	// 系统没有设备在通讯中, 返回空
+	if v, _ := exec.Command("bash", "-c", mapBash[2521]).Output(); len(v) == 0 {
+		return nil
+	}
+
 	nameArr := make([]string, 0)
 
 	out, _ := exec.Command("bash", "-c", mapBash[2522]).Output()
